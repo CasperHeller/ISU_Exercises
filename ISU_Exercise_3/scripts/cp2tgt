@@ -1,0 +1,4 @@
+#!/bin/bash
+
+
+sshpass -p '' scp -r  $1 root@10.9.8.2:$1

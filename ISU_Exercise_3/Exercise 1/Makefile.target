@@ -1,0 +1,17 @@
+SOURCES=hello.cpp
+EXE=hello.target
+CXXFLAGS=-Wall
+CXX=arm-angstrom-linux-gnueabi-g++
+OBJECTS=$(SOURCES:.cpp=.o)
+DEPS=$(SOURCES:.cpp=.d)
+
+$(EXE): $(DEPS) $(OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS)
+
+%.d: %.cpp
+	$(CXX) -MT$(@:.d=.o) -MM $(CXXFLAGS) $^ > $@
+
+clean: 
+	@rm $(OBJECTS) ${EXE} $(DEPS)
+
+-include $(DEPS)
