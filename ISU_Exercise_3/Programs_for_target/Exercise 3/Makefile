@@ -1,22 +1,23 @@
 CXX=g++
 SOURCES=main.cpp part1.cpp part2.cpp
-OBJDIR:=host
-OBJECTS:=$(addprefix $(OBJDIR)/,$(SOURCES:.cpp=.o))
+DIR:=host/
+OBJECTS:=$(SOURCES:%.cpp=$(DIR)%.o)
 EXECUTABLE=parts
 
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CXX) -o $@ $(OBJECTS)
+	$(CXX) -o $(DIR)$@ $(OBJECTS)
 
-$(OBJDIR)/%.o: %.c
+$(DIR)%.o: %.cpp $(DIR)
 	$(CXX) -c $< -o $@
 
-$(OBJDIR):
-	@mkdir $(OBJDIR)
+$(DIR):
+	@mkdir $(DIR)
 	
 clean : 
-	@rm $(OBJECTS) ${EXECUTABLE}
+	@rm $(OBJECTS) $(DIR)${EXECUTABLE}
+	@rmdir $(DIR)
 
 help :
 	@echo all clean help $(EXECUTABLE) $(OBJECTS)
