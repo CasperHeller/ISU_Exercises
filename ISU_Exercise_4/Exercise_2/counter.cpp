@@ -14,7 +14,6 @@ void *incrementThread(void*);
 int main ()
 {
   pthread_t threadRead, threadInc;
-  unsigned int shareduint;
   
   cout << "Creating threads..." << endl;
   if ( pthread_create(&threadRead, NULL, printThread, NULL) ||

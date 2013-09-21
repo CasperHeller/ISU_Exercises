@@ -1,5 +1,5 @@
-SOURCES=Vector.cpp
-EXECUTABLE=vector
+SOURCES=main.cpp part1.cpp part2.cpp
+EXECUTABLE=parts
 LIBRARIES=-pthread
 CFLAGS=-Wall
 ###

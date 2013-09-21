@@ -1,23 +1,36 @@
-CXX=g++
 SOURCES=threads.cpp
-DIR=objects/
-LIBRARIES=-pthread
-OBJECTS=$(SOURCES:%.cpp=$(DIR)%.o)
 EXECUTABLE=threads
+LIBRARIES=-pthread
+CFLAGS=-Wall
+###
+ifneq ($(ARCH),target)
+CXX=g++
+DIR=host/
+EXE=$(EXECUTABLE)
+else
+CXX=arm-angstrom-linux-gnueabi-g++
+DIR=target/
+EXE=$(addsuffix .target,$(EXECUTABLE))
+endif
 
-all: $(SOURCES) $(EXECUTABLE)
+OBJECTS=$(SOURCES:%.cpp=$(DIR)%.o)
 
-$(EXECUTABLE): $(OBJECTS)
-	$(CXX) -o $@ $(OBJECTS) $(LIBRARIES)
-
+$(EXE): $(OBJECTS)
+	$(CXX) -o $@ $(OBJECTS) $(LIBRARIES) $(DEBUG)
+	
 $(DIR)%.o: %.cpp $(DIR)
-	$(CXX) -c $< -o $@
-
+	$(CXX) $(CFLAGS) -c $< -o $@ 
+	
 $(DIR):
 	@mkdir $(DIR)
 	
-clean : 
-	@rm $(OBJECTS) ${EXECUTABLE}
-
-help :
-	@echo all clean help $(EXECUTABLE) $(OBJECTS)
+clean: 
+	@rm $(OBJECTS) $(EXE)
+	@rmdir $(DIR)
+	
+help:
+	@echo "Instructions for makefile:"
+	@echo "make [OPTIONS]                 make for host"
+	@echo "make ARCH=target [OPTIONS]     make for target"
+	@echo "OPTIONS:"
+	@echo "clean          removes objects directory and executable"
