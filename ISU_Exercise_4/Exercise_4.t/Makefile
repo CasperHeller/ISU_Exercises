@@ -1,9 +1,9 @@
-CXX=g++
+CXX=arm-angstrom-linux-gnueabi-g++
 SOURCES=Vector.cpp
-DIR=objects/
+DIR=target/
 LIBRARIES=-pthread
 OBJECTS=$(SOURCES:%.cpp=$(DIR)%.o)
-EXECUTABLE=vector
+EXECUTABLE=vector.target
 
 all: $(SOURCES) $(EXECUTABLE)
 
@@ -19,6 +19,6 @@ $(DIR):
 clean : 
 	@rm $(OBJECTS) $(EXECUTABLE)
 	@rmdir $(DIR)
-
+	
 help :
 	@echo all clean help $(EXECUTABLE) $(OBJECTS)
