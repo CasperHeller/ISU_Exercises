@@ -32,5 +32,5 @@ help:
 	@echo "Instructions for makefile:"
 	@echo "make [OPTIONS]                 make for host"
 	@echo "make ARCH=target [OPTIONS]     make for target"
-	@echo "Options:"
+	@echo "OPTIONS:"
 	@echo "clean          removes objects directory and executable"
