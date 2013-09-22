@@ -15,11 +15,13 @@ void *printThread(void* tid);
 int main ()
 {
   pthread_t threads[THREAD_AMOUNT];
+  int tid[THREAD_AMOUNT];
 
   for(int i = 0; i < THREAD_AMOUNT; i++)
   {
+    tid[i] = i;
     cout << "Creating thread with ID: " << i << endl;
-    if (pthread_create(&threads[i], NULL, printThread, (void*)(i))) 
+    if (pthread_create(&threads[i], NULL, printThread, (void*)(tid+i))) 
     {
       cout << "Could not create thread ID: " << i << endl;
       cout << "Now terminating..." << endl;
@@ -37,8 +39,7 @@ int main ()
 
 void *printThread(void* tid)
 {
-  
-  int threadID = (int)(tid);
+  int threadID = *(int*)(tid);
   
   for(int i = 0; i < 10; i++)
   {

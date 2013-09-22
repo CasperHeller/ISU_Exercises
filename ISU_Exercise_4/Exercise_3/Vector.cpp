@@ -22,11 +22,13 @@ int main ()
   }
   
   pthread_t threads[threadAmount];
-  
+  int tid[threadAmount];  
+
   cout << "Creating " << threadAmount << " threads..." << endl;
   for(int i = 0; i < threadAmount; i++)
   {
-    if ( pthread_create(&threads[i], NULL, writer, (void*)i) )
+    tid[i] = i;
+    if ( pthread_create(&threads[i], NULL, writer, (void*)(tid+i)) )
     {
       cout << "Could not create thread ID" << endl;
       cout << "Now terminating..." << endl;
@@ -44,7 +46,7 @@ int main ()
 
 void *writer(void* tid)
 {
-  int threadID = (int)(tid);
+  int threadID = *(int*)(tid);
   
   for(;;)
   {
