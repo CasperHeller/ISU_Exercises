@@ -16,7 +16,7 @@ endif
 OBJECTS=$(SOURCES:%.cpp=$(DIR)%.o)
 
 $(EXE): $(OBJECTS)
-	$(CXX) -o $@ $(OBJECTS) $(LIBRARIES) $(DEBUG)
+	$(CXX) -o $@ $(OBJECTS) $(LIBRARIES)
 	
 $(DIR)%.o: %.cpp $(DIR)
 	$(CXX) $(CFLAGS) -c $< -o $@ 
