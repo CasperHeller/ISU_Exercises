@@ -22,7 +22,7 @@ int main ()
     return EXIT_FAILURE;
 	}
 
-  int threadAmount;
+  int threadAmount = 0;
   
   while (threadAmount > 100 || threadAmount < 1)
   {
