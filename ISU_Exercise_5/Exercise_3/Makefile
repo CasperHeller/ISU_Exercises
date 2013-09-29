@@ -1,31 +1,42 @@
-SOURCES=Vector.cpp ScopedLocker.cpp
-EXECUTABLE=vector
-LIBRARIES=-pthread
-CFLAGS=-Wall
-###
-ifneq ($(ARCH),target)
-CXX=g++
-DIR=host/
-EXE=$(EXECUTABLE)
+# Makefile for ISU
+# by TeamISU
+# with automatic source detection
+EXENAME   := vector
+SOURCES   :=
+LD_FLAGS  := -pthread
+CXX_FLAGS := -Wall
+
+
+
+# Auto add sources if none
+ifeq ($(SOURCES),)
+	CPP_FILES := $(wildcard *.cpp)
 else
-CXX=arm-angstrom-linux-gnueabi-g++
-DIR=target/
-EXE=$(addsuffix .target,$(EXECUTABLE))
+	CPP_FILES := $(SOURCES)
 endif
+# Crosscompiling support
+ifneq ($(ARCH),target)
+	CXX=g++
+	DIR=host
+	EXE=$(EXENAME)
+else
+	CXX=arm-angstrom-linux-gnueabi-g++
+	DIR=target
+	EXE=$(addsuffix .target,$(EXENAME))
+endif
+OBJ_FILES := $(addprefix $(DIR)/,$(notdir $(CPP_FILES:.cpp=.o)))
 
-OBJECTS=$(SOURCES:%.cpp=$(DIR)%.o)
+$(EXE): $(OBJ_FILES)
+	$(CXX) $(LD_FLAGS) -o $@ $^ 
 
-$(EXE): $(OBJECTS)
-	$(CXX) -o $@ $(OBJECTS) $(LIBRARIES)
-	
-$(DIR)%.o: %.cpp $(DIR)
-	$(CXX) $(CFLAGS) -c $< -o $@ 
-	
+$(DIR)/%.o: %.cpp | $(DIR)
+	$(CXX) $(CXX_FLAGS) -c -o $@ $<
+
 $(DIR):
 	@mkdir $(DIR)
-	
+
 clean: 
-	@rm $(OBJECTS) $(EXE)
+	@rm $(OBJ_FILES) $(OBJ_FILES:.o=.d) $(EXE)
 	@rmdir $(DIR)
 	
 help:
@@ -34,3 +45,8 @@ help:
 	@echo "make ARCH=target [OPTIONS]     make for target"
 	@echo "OPTIONS:"
 	@echo "clean          removes objects directory and executable"
+
+# Section for dependency files:
+CXX_FLAGS += -MMD
+-include $(OBJ_FILES:.o=.d)
+# end of file
