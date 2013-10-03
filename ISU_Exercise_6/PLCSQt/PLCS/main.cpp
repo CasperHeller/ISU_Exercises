@@ -46,13 +46,13 @@ int main()
 
     if ( (err = pthread_create(&entryThread, NULL, entryFunc, NULL)) )
     {
-      cout << "Could not create entryThread, ERROR: " << err << endl;
-      return EXIT_FAILURE;
+        cout << "Could not create entryThread, ERROR: " << err << endl;
+        return EXIT_FAILURE;
     }
     if ( (err = pthread_create(&exitThread, NULL, exitFunc, NULL)) )
     {
-      cout << "Could not create exitThread, ERROR: " << err << endl;
-      return EXIT_FAILURE;
+        cout << "Could not create exitThread, ERROR: " << err << endl;
+        return EXIT_FAILURE;
     }
 
     // Initializing car threads
@@ -60,7 +60,7 @@ int main()
     int carID[CAR_AMOUNT];
     for (int i = 0; i < CAR_AMOUNT; i++)
     {
-        carID[i] = i+1;
+        carID[i] = i+1; //ID should start at 1 not 0
         if ( (err = pthread_create(&carThread[i], NULL, carFunc, (void*)(carID+i))) )
         {
             cout << "Could not create carThread with ID " << carID+i << ", ERROR: " << err << endl;
@@ -81,7 +81,7 @@ int main()
     }
     for (int i = 0; i < CAR_AMOUNT; i++)
     {
-        if (err = pthread_join(carThread[i], NULL))
+        if ( (err = pthread_join(carThread[i], NULL)) )
         {
             cout << "Could not join carThread with ID " << carID+i << ", ERROR: " << err << endl;
             return EXIT_FAILURE;
@@ -120,6 +120,8 @@ void *carFunc(void*)
     entryWaiting = false;
     pthread_cond_signal(&entrySignal);
     pthread_mutex_unlock(&entryLock);
+
+    pthread_exit((void*)&ID);
 }
 
 void *entryFunc(void*)
@@ -140,9 +142,12 @@ void *entryFunc(void*)
     cout << "The entry gate is now closed." << endl;
     entryIsOpen = false;
     pthread_mutex_unlock(&entryLock);
+
+    pthread_exit(NULL);
 }
 
 void *exitFunc(void*)
 {
 
+    pthread_exit(NULL);
 }

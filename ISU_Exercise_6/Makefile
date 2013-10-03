@@ -1,7 +1,7 @@
 # Makefile for ISU
 # by TeamISU
 # with automatic source detection
-EXENAME   := vector
+EXENAME   := main
 SOURCES   :=
 LD_FLAGS  := -pthread
 CXX_FLAGS := -Wall
