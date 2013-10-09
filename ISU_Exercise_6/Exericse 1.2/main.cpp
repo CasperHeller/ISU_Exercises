@@ -10,8 +10,8 @@ void *entryFunc(void*);
 void *exitFunc(void*);
 
 // Constants
-const int CAR_AMOUNT = 3;   // Amount of cars
-const int SLEEP_TIME = 15;  // Maximum sleeping time
+const int CAR_AMOUNT = 3;  // Amount of car threads
+const int SLEEP_TIME = 5;  // Maximum sleeping time (seconds)
 
 // Global variables
 pthread_mutex_t entryLock, exitLock;
@@ -28,6 +28,9 @@ int main()
 
     // Error variable
     int err = 0;
+
+	// Seed rand() with time()
+	srand (time(NULL));
 
     // Initializing mutexes
     if ( (err = pthread_mutex_init(&entryLock, NULL)) )
@@ -133,6 +136,7 @@ void *carFunc(void* carID)
     // Get the ID of the car
     int ID = *((int*)carID);
 
+    // Loop it, the car should always try to reenter
     for (;;)
     {
         // Entry
@@ -174,6 +178,7 @@ void *carFunc(void* carID)
 
 void *entryFunc(void*)
 {
+    // Loop so we can handle unlimited amount of requests
     for (;;)
     {
         pthread_mutex_lock(&entryLock);
@@ -183,7 +188,7 @@ void *entryFunc(void*)
         }
         cout << "The entry gate is now open." << endl;
         entryIsOpen = true;
-        pthread_cond_signal(&entrySignal);
+        pthread_cond_broadcast(&entrySignal);
         while(entryWaiting)
         {
             pthread_cond_wait(&entrySignal, &entryLock);
@@ -197,6 +202,7 @@ void *entryFunc(void*)
 
 void *exitFunc(void*)
 {
+    // Loop so we can handle unlimited amount of requests
     for (;;)
     {
         pthread_mutex_lock(&exitLock);
@@ -206,7 +212,7 @@ void *exitFunc(void*)
         }
         cout << "The exit gate is now open." << endl;
         exitIsOpen = true;
-        pthread_cond_signal(&exitSignal);
+        pthread_cond_broadcast(&exitSignal);
         while(exitWaiting)
         {
             pthread_cond_wait(&exitSignal, &exitLock);

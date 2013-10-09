@@ -10,7 +10,7 @@ void *entryFunc(void*);
 void *exitFunc(void*);
 
 // Constants
-const int CAR_AMOUNT = 1;
+const int CAR_AMOUNT = 1;   // Amount of cars
 
 // Global variables
 pthread_mutex_t entryLock, exitLock;
@@ -68,10 +68,10 @@ int main()
 
     // Initializing car threads
     pthread_t carThread[CAR_AMOUNT];
-    int carID[CAR_AMOUNT];
+    int carID[CAR_AMOUNT];  // Array to pass by reference
     for (int i = 0; i < CAR_AMOUNT; i++)
     {
-        carID[i] = i+1; //ID should start at 1 not 0
+        carID[i] = i+1; // ID array should start with 1 not 0
         if ( (err = pthread_create(&carThread[i], NULL, carFunc, (void*)(carID+i))) )
         {
             cout << "Could not create carThread with ID " << carID+i << ", ERROR: " << err << endl;
@@ -132,86 +132,79 @@ void *carFunc(void* carID)
     // Get the ID of the car
     int ID = *((int*)carID);
 
-    for (;;)
+    // Entry
+    cout << "Car " << ID << " is approaching the entry gate." << endl;
+    pthread_mutex_lock(&entryLock);
+    entryWaiting = true;
+    pthread_cond_signal(&entrySignal);
+    while(!entryIsOpen)
     {
-        // Entry
-        cout << "Car " << ID << " is approaching entry gate." << endl;
-        pthread_mutex_lock(&entryLock);
-        entryWaiting = true;
-        pthread_cond_signal(&entrySignal);
-        while(!entryIsOpen)
-        {
-            pthread_cond_wait(&entrySignal, &entryLock);
-        }
-        cout << "Car " << ID << " is now inside the parking lot." << endl;
-        entryWaiting = false;
-        pthread_cond_signal(&entrySignal);
-        pthread_mutex_unlock(&entryLock);
-
-        // Now sleep before exiting
-        sleep(rand()%2+1);
-
-        // Exit
-        cout << "Car " << ID << " is approaching exit gate." << endl;
-        pthread_mutex_lock(&exitLock);
-        exitWaiting = true;
-        pthread_cond_signal(&exitSignal);
-        while(!exitIsOpen)
-        {
-            pthread_cond_wait(&exitSignal, &exitLock);
-        }
-        cout << "Car " << ID << " is now outside the parking lot." << endl;
-        exitWaiting = false;
-        pthread_cond_signal(&exitSignal);
-        pthread_mutex_unlock(&exitLock);
-
-        // Now sleep before reentry
-        sleep(rand()%2+1);
+        pthread_cond_wait(&entrySignal, &entryLock);
     }
+    cout << "Car " << ID << " is now inside the parking lot." << endl;
+    entryWaiting = false;
+    pthread_cond_signal(&entrySignal);
+    pthread_mutex_unlock(&entryLock);
+
+    // Exit
+    cout << "Car " << ID << " is approaching exit gate." << endl;
+    pthread_mutex_lock(&exitLock);
+    exitWaiting = true;
+    pthread_cond_signal(&exitSignal);
+    while(!exitIsOpen)
+    {
+        pthread_cond_wait(&exitSignal, &exitLock);
+    }
+    cout << "Car " << ID << " is now outside the parking lot." << endl;
+    exitWaiting = false;
+    pthread_cond_signal(&exitSignal);
+    pthread_mutex_unlock(&exitLock);
+
+    // Exit
     pthread_exit((void*)&ID);
 }
 
 void *entryFunc(void*)
 {
-    for (;;)
+    pthread_mutex_lock(&entryLock);
+    while(!entryWaiting)
     {
-        pthread_mutex_lock(&entryLock);
-        while(!entryWaiting)
-        {
-            pthread_cond_wait(&entrySignal, &entryLock);
-        }
-        cout << "The entry gate is now open." << endl;
-        entryIsOpen = true;
-        pthread_cond_signal(&entrySignal);
-        while(entryWaiting)
-        {
-            pthread_cond_wait(&entrySignal, &entryLock);
-        }
-        cout << "The entry gate is now closed." << endl;
-        entryIsOpen = false;
-        pthread_mutex_unlock(&entryLock);
+        pthread_cond_wait(&entrySignal, &entryLock);
     }
+    cout << "The entry gate is now open." << endl;
+    entryIsOpen = true;
+    pthread_cond_signal(&entrySignal);
+    while(entryWaiting)
+    {
+        pthread_cond_wait(&entrySignal, &entryLock);
+    }
+    cout << "The entry gate is now closed." << endl;
+    entryIsOpen = false;
+    pthread_mutex_unlock(&entryLock);
+
+    // Exit
+    pthread_exit(NULL);
 }
 
 void *exitFunc(void*)
 {
-    for (;;)
+    pthread_mutex_lock(&exitLock);
+    while(!exitWaiting)
     {
-        pthread_mutex_lock(&exitLock);
-        while(!exitWaiting)
-        {
-            pthread_cond_wait(&exitSignal, &exitLock);
-        }
-        cout << "The exit gate is now open." << endl;
-        exitIsOpen = true;
-        pthread_cond_signal(&exitSignal);
-        while(exitWaiting)
-        {
-            pthread_cond_wait(&exitSignal, &exitLock);
-        }
-        cout << "The exit gate is now closed." << endl;
-        exitIsOpen = false;
-        pthread_mutex_unlock(&exitLock);
+        pthread_cond_wait(&exitSignal, &exitLock);
     }
+    cout << "The exit gate is now open." << endl;
+    exitIsOpen = true;
+    pthread_cond_signal(&exitSignal);
+    while(exitWaiting)
+    {
+        pthread_cond_wait(&exitSignal, &exitLock);
+    }
+    cout << "The exit gate is now closed." << endl;
+    exitIsOpen = false;
+    pthread_mutex_unlock(&exitLock);
+
+    // Exit
     pthread_exit(NULL);
 }
+
